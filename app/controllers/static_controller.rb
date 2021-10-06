@@ -8,7 +8,7 @@ class StaticController < ApplicationController
   def authorize_uri
     params = {
       client_id: client_id,
-      redirect_uri: 'https://3999-13-55-60-236.ngrok.io',
+      redirect_uri: "#{Rails.configuration.host_url}/webhooks/spotify",
       response_type: 'code'
     }
 

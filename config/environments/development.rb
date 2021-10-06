@@ -74,5 +74,10 @@ Rails.application.configure do
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
 
-  config.hosts << '3999-13-55-60-236.ngrok.io'
+  config.host_server = ENV.fetch('HOST_SERVER')
+  config.host_url = "https://#{config.host_server}"
+
+  config.hosts << config.host_server
+
+  config.autoload_paths += Dir[Rails.root.join('lib')]
 end
