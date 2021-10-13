@@ -14,9 +14,10 @@ module Webhooks
         http.request(req)
       end
 
-      puts res.body
+      response = JSON.parse(res.body).with_indifferent_access
 
-      redirect_to root_path
+      @profile_pic_url = response[:images][0][:url]
+      render 'static/profile'
     end
   end
 end
