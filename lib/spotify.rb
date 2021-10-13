@@ -27,6 +27,8 @@ module Spotify
 
       puts "RESPONSE CODE: #{response.code}"
       puts "RESPONSE BODY: #{response.body}"
+
+      JSON.parse(response.body).with_indifferent_access
     end
 
     private
