@@ -16,6 +16,6 @@ class StaticController < ApplicationController
   end
 
   def client_id
-    'd8bf254bdfdc4c3d9c211161a57748b1'
+    ENV.fetch('SPOTIFY_CLIENT_ID')
   end
 end
