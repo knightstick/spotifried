@@ -4,4 +4,8 @@ Rails.application.routes.draw do
   root to: 'static#index'
 
   get 'webhooks/spotify', to: 'webhooks/spotify#create'
+
+  namespace :my do
+    resource :profile, only: [:show]
+  end
 end

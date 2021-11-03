@@ -23,12 +23,20 @@ module Spotify
       token_uri = URI::HTTPS.build(host: 'accounts.spotify.com', path: '/api/token')
       headers = { 'Authorization' => authorization_header }
 
+      puts data.inspect
+      puts data.to_query
       response = Net::HTTP.post(token_uri, data.to_query, headers)
 
       puts "RESPONSE CODE: #{response.code}"
       puts "RESPONSE BODY: #{response.body}"
 
-      JSON.parse(response.body).with_indifferent_access
+      JSON.parse(response.body).with_indifferent_access.slice(:access_token, :expires_in, :refresh_token).symbolize_keys
+    end
+
+    def create_credential!(access_token:, expires_in:, refresh_token:)
+      Spotify::Credential.create!(
+        access_token: access_token, expires_in: expires_in, refresh_token: refresh_token
+      )
     end
 
     private
