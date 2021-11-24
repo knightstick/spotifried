@@ -1,7 +1,11 @@
 <h1>PROFILE</h1>
 <%= image_tag @profile_pic_url %>
 <ol>
-  <% @song_titles.each do |song_title| %>
-    <li><%= song_title %></li>
+  <% @recommendations.each do |track| %>
+    <li>
+      <%= link_to track.spotify_url do %>
+        <%= track.name %> - <%= track.artists.map(&:name).to_sentence %>
+      <% end %>
+    </li>
   <% end %>
 </ol>

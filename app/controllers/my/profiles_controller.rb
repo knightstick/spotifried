@@ -1,64 +1,23 @@
 class My::ProfilesController < ApplicationController
   def show
-    @profile_pic_url = use_token_for_profile_picture(current_user.spotify_credentials.last)
-    use_token_for_genres(current_user.spotify_credentials.last)
-    @song_titles = use_token_for_recommendations(current_user.spotify_credentials.last)
+    @profile_pic_url = get_profile_picture
+    @recommendations = get_recommendations
     render 'static/profile'
   end
 
   private
 
-  def use_token_for_profile_picture(credential)
-    response = fetch_user_data_from_spotify(credential)
-    response[:images][0][:url]
+  def spotify
+    @spotify ||= Spotify::Client.new(current_user.spotify_credentials.last)
   end
 
-  def use_token_for_recommendations(credential)
-    response = fetch_recommendation_from_spotify(credential)
-    puts response
-    response[:tracks].map { |track| track[:name] }
+  def get_profile_picture
+    spotify_profile = spotify.get_my_profile
+    spotify_profile.picture_url
   end
 
-  def fetch_user_data_from_spotify(credential)
-    access_token = credential.access_token
-    uri = URI('https://api.spotify.com/v1/me')
-    req = Net::HTTP::Get.new(uri)
-    req['Authorization'] = "Bearer #{access_token}"
-
-    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(req)
-    end
-
-    JSON.parse(res.body).with_indifferent_access
-  end
-
-  def use_token_for_genres(credential)
-    access_token = credential.access_token
-    uri = URI('https://api.spotify.com/v1/recommendations/available-genre-seeds')
-    req = Net::HTTP::Get.new(uri)
-    req['Authorization'] = "Bearer #{access_token}"
-
-    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(req)
-    end
-
-    puts JSON.parse(res.body).with_indifferent_access
-  end
-
-  def fetch_recommendation_from_spotify(credential)
-    access_token = credential.access_token
-    uri = URI('https://api.spotify.com/v1/recommendations')
-    params = { seed_genres: seed_genres }
-    uri.query = URI.encode_www_form(params)
-
-    req = Net::HTTP::Get.new(uri)
-    req['Authorization'] = "Bearer #{access_token}"
-
-    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(req)
-    end
-
-    JSON.parse(res.body).with_indifferent_access
+  def get_recommendations
+    spotify.get_recommendations(seed_genres)
   end
 
   def current_user
