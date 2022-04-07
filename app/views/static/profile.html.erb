@@ -1,5 +1,14 @@
 <h1>PROFILE</h1>
 <%= image_tag @profile_pic_url %>
+
+<%= form_with url: "/my/profile", method: :get do |form| %>
+  <% @genres.each do |genre| %>
+    <%= form.check_box "genre[]", { checked: genre.checked?, include_hidden: false, id: genre.name }, genre.name %>
+    <%= form.label genre.name %>
+  <% end %>
+  <%= form.submit "Submit" %>
+<% end %>
+
 <ol>
   <% @recommendations.each do |track| %>
     <li>

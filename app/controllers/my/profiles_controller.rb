@@ -1,11 +1,35 @@
 class My::ProfilesController < ApplicationController
+  GENRES = [
+    'acoustic',
+    'chill',
+    'classical',
+    'dance',
+    'funk',
+    'heavy-metal',
+    'hip-hop',
+    'jazz',
+    'k-pop',
+    'pop',
+    'rock',
+    'rock-n-roll'
+  ]
+
   def show
     @profile_pic_url = get_profile_picture
     @recommendations = get_recommendations
+    @genres = GENRES.map do |genre|
+      Genre.new(genre, checked_genre?(genre))
+    end
     render 'static/profile'
   end
 
   private
+
+  Genre = Struct.new(:name, :checked) do
+    def checked?
+      checked
+    end
+  end
 
   def spotify
     @spotify ||= Spotify::Client.new(current_user.spotify_credentials.last)
@@ -17,15 +41,26 @@ class My::ProfilesController < ApplicationController
   end
 
   def get_recommendations
-    spotify.get_recommendations(seed_genres)
+    if seed_genres.present?
+      spotify.get_recommendations(seed_genres)
+    else
+      spotify.get_recommendations(default_genres)
+    end
   end
 
   def current_user
     @current_user ||= User.find(session[:user_id])
   end
 
-  # {"genres"=>["acoustic", "afrobeat", "alt-rock", "alternative", "ambient", "anime", "black-metal", "bluegrass", "blues", "bossanova", "brazil", "breakbeat", "british", "cantopop", "chicago-house", "children", "chill", "classical", "club", "comedy", "country", "dance", "dancehall", "death-metal", "deep-house", "detroit-techno", "disco", "disney", "drum-and-bass", "dub", "dubstep", "edm", "electro", "electronic", "emo", "folk", "forro", "french", "funk", "garage", "german", "gospel", "goth", "grindcore", "groove", "grunge", "guitar", "happy", "hard-rock", "hardcore", "hardstyle", "heavy-metal", "hip-hop", "holidays", "honky-tonk", "house", "idm", "indian", "indie", "indie-pop", "industrial", "iranian", "j-dance", "j-idol", "j-pop", "j-rock", "jazz", "k-pop", "kids", "latin", "latino", "malay", "mandopop", "metal", "metal-misc", "metalcore", "minimal-techno", "movies", "mpb", "new-age", "new-release", "opera", "pagode", "party", "philippines-opm", "piano", "pop", "pop-film", "post-dubstep", "power-pop", "progressive-house", "psych-rock", "punk", "punk-rock", "r-n-b", "rainy-day", "reggae", "reggaeton", "road-trip", "rock", "rock-n-roll", "rockabilly", "romance", "sad", "salsa", "samba", "sertanejo", "show-tunes", "singer-songwriter", "ska", "sleep", "songwriter", "soul", "soundtracks", "spanish", "study", "summer", "swedis", "synth-pop", "tango", "techno", "trance", "trip-hop", "turkish", "work-out", "world-music"]}
   def seed_genres
-    params[:genres] || 'classical,country'
+    params[:genre].join(',')
+  end
+
+  def checked_genre?(name)
+    params[:genre].include?(name)
+  end
+
+  def default_genres
+    'rock'
   end
 end
